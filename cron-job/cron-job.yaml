@@ -1,0 +1,22 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: cronjob-cleanup
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: clean-image
+            image: mayusuk/clean-image:v2
+            volumeMounts:
+            - name: dockersock
+              mountPath: /var/run/docker.sock
+          restartPolicy: OnFailure
+          nodeName: NODE_NAME
+          volumes:
+            - name: dockersock
+              hostPath:
+               path: /var/run/docker.sock

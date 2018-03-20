@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cleanup-cronjob-daemonset
+  namespace: default
+  labels:
+    k8s-app: cleanup-cronjob
+spec:
+  selector:
+    matchLabels:
+      name: cleanup-cronjob-daemonset
+  template:
+    metadata:
+      labels:
+        name: cleanup-cronjob-daemonset
+    spec:
+      containers:
+      - name: clean-container-image-daemonset
+        image: lachlanevenson/k8s-kubectl:v1.6.12
+        command: [ "sh", "-c"]
+        args:
+        - sed 's/NODE_NAME/$NODE_NAME/g;' /opt/cron-job.yaml && \
+          kubectl create -f /opt/cron-job.yaml
+        volumeMounts:
+        - name: dockersock
+          mountPath: /var/run/docker.sock
+        env:
+         - name: NODE_NAME
+           valueFrom:
+             fieldRef:
+               fieldPath: spec.nodeName
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: dockersock
+        hostPath:
+          path: /var/run/docker.sock
