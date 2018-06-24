@@ -1,7 +1,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: cronjob-cleanup
+  name: cronjob-cleanup-NODE_NAME
 spec:
   schedule: "*/1 * * * *"
   jobTemplate:
@@ -15,7 +15,8 @@ spec:
             - name: dockersock
               mountPath: /var/run/docker.sock
           restartPolicy: OnFailure
-          nodeName: NODE_NAME
+          nodeSelector:
+            kubernetes.io/hostname: NODE_NAME
           volumes:
             - name: dockersock
               hostPath:
